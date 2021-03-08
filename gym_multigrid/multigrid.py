@@ -23,8 +23,8 @@ COLORS = {
 
 COLOR_NAMES = sorted(list(COLORS.keys()))
 
-class World:
 
+class World:
     encode_dim = 6
 
     normalize_obs = 1
@@ -61,10 +61,9 @@ class World:
 
 
 class SmallWorld:
-
     encode_dim = 3
 
-    normalize_obs = 1/3
+    normalize_obs = 1 / 3
 
     COLOR_TO_IDX = {
         'red': 0,
@@ -145,7 +144,7 @@ class WorldObj:
 
     def encode(self, world, current_agent=False):
         """Encode the a description of this object as a 3-tuple of integers"""
-        if world.encode_dim==3:
+        if world.encode_dim == 3:
             return (world.OBJECT_TO_IDX[self.type], world.COLOR_TO_IDX[self.color], 0)
         else:
             return (world.OBJECT_TO_IDX[self.type], world.COLOR_TO_IDX[self.color], 0, 0, 0, 0)
@@ -190,6 +189,7 @@ class Goal(WorldObj):
 
     def render(self, img):
         fill_coords(img, point_in_rect(0, 1, 0, 1), COLORS[self.color])
+
 
 class Switch(WorldObj):
     def __init__(self, world):
@@ -407,15 +407,17 @@ class Agent(WorldObj):
 
     def encode(self, world, current_agent=False):
         """Encode the a description of this object as a 3-tuple of integers"""
-        if world.encode_dim==3:
+        if world.encode_dim == 3:
             return (world.OBJECT_TO_IDX[self.type], world.COLOR_TO_IDX[self.color], self.dir)
         elif self.carrying:
             if current_agent:
-                return (world.OBJECT_TO_IDX[self.type], world.COLOR_TO_IDX[self.color], world.OBJECT_TO_IDX[self.carrying.type],
-                        world.COLOR_TO_IDX[self.carrying.color], self.dir, 1)
+                return (
+                world.OBJECT_TO_IDX[self.type], world.COLOR_TO_IDX[self.color], world.OBJECT_TO_IDX[self.carrying.type],
+                world.COLOR_TO_IDX[self.carrying.color], self.dir, 1)
             else:
-                return (world.OBJECT_TO_IDX[self.type], world.COLOR_TO_IDX[self.color], world.OBJECT_TO_IDX[self.carrying.type],
-                        world.COLOR_TO_IDX[self.carrying.color], self.dir, 0)
+                return (
+                world.OBJECT_TO_IDX[self.type], world.COLOR_TO_IDX[self.color], world.OBJECT_TO_IDX[self.carrying.type],
+                world.COLOR_TO_IDX[self.carrying.color], self.dir, 0)
 
         else:
             if current_agent:
@@ -666,7 +668,7 @@ class Grid:
         # Highlight the cell  if needed
         if len(highlights) > 0:
             for h in highlights:
-                highlight_img(img, color=COLORS[world.IDX_TO_COLOR[h%len(world.IDX_TO_COLOR)]])
+                highlight_img(img, color=COLORS[world.IDX_TO_COLOR[h % len(world.IDX_TO_COLOR)]])
 
         # Downsample the image to perform supersampling/anti-aliasing
         img = downsample(img, subdivs)
@@ -832,8 +834,9 @@ class Grid:
 
         return mask
 
+
 class Actions:
-    available=['still', 'left', 'right', 'forward', 'pickup', 'drop', 'toggle', 'done']
+    available = ['still', 'left', 'right', 'forward', 'pickup', 'drop', 'toggle', 'done']
 
     still = 0
     # Turn left, turn right, move forward
@@ -851,8 +854,9 @@ class Actions:
     # Done completing task
     done = 7
 
+
 class SmallActions:
-    available=['still', 'left', 'right', 'forward']
+    available = ['still', 'left', 'right', 'forward']
 
     # Turn left, turn right, move forward
     still = 0
@@ -860,14 +864,16 @@ class SmallActions:
     right = 2
     forward = 3
 
+
 class MineActions:
-    available=['still', 'left', 'right', 'forward', 'build']
+    available = ['still', 'left', 'right', 'forward', 'build']
 
     still = 0
     left = 1
     right = 2
     forward = 3
     build = 4
+
 
 class MultiGridEnv(gym.Env):
     """
@@ -893,7 +899,7 @@ class MultiGridEnv(gym.Env):
             partial_obs=True,
             agent_view_size=7,
             actions_set=Actions,
-            objects_set = World
+            objects_set=World
     ):
         self.agents = agents
 
@@ -912,7 +918,7 @@ class MultiGridEnv(gym.Env):
         # Actions are discrete integer values
         self.action_space = spaces.Discrete(len(self.actions.available))
 
-        self.objects=objects_set
+        self.objects = objects_set
 
         if partial_obs:
             self.observation_space = spaces.Box(
@@ -975,7 +981,7 @@ class MultiGridEnv(gym.Env):
             obs = self.gen_obs()
         else:
             obs = [self.grid.encode_for_agents(self.agents[i].pos) for i in range(len(self.agents))]
-        obs=[self.objects.normalize_obs*ob for ob in obs]
+        obs = [self.objects.normalize_obs * ob for ob in obs]
         return obs
 
     def seed(self, seed=1337):
@@ -1253,7 +1259,8 @@ class MultiGridEnv(gym.Env):
 
         for i in order:
 
-            if self.agents[i].terminated or self.agents[i].paused or not self.agents[i].started or actions[i] == self.actions.still:
+            if self.agents[i].terminated or self.agents[i].paused or not self.agents[i].started or actions[
+                i] == self.actions.still:
                 continue
 
             # Get the position in front of the agent
@@ -1286,7 +1293,7 @@ class MultiGridEnv(gym.Env):
                     self.agents[i].pos = fwd_pos
                 self._handle_special_moves(i, rewards, fwd_pos, fwd_cell)
 
-            elif 'build' in self.actions.available and actions[i]==self.actions.build:
+            elif 'build' in self.actions.available and actions[i] == self.actions.build:
                 self._handle_build(i, rewards, fwd_pos, fwd_cell)
 
             # Pick up an object
@@ -1317,7 +1324,7 @@ class MultiGridEnv(gym.Env):
         else:
             obs = [self.grid.encode_for_agents(self.agents[i].pos) for i in range(len(actions))]
 
-        obs=[self.objects.normalize_obs*ob for ob in obs]
+        obs = [self.objects.normalize_obs * ob for ob in obs]
 
         return obs, rewards, done, {}
 
@@ -1360,7 +1367,8 @@ class MultiGridEnv(gym.Env):
         grids, vis_masks = self.gen_obs_grid()
 
         # Encode the partially observable view into a numpy array
-        obs = [grid.encode_for_agents(self.objects, [grid.width // 2, grid.height - 1], vis_mask) for grid, vis_mask in zip(grids, vis_masks)]
+        obs = [grid.encode_for_agents(self.objects, [grid.width // 2, grid.height - 1], vis_mask) for grid, vis_mask in
+               zip(grids, vis_masks)]
 
         return obs
 

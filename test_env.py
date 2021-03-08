@@ -13,7 +13,8 @@ def main():
     if args.env == 'soccer':
         register(
             id='multigrid-soccer-v0',
-            entry_point='gym_multigrid.envs:SoccerGame4HEnv10x15N2',
+            #entry_point='gym_multigrid.envs:SoccerGame4HEnv10x15N2',
+            entry_point='gym_multigrid.envs:SoccerGameSD1',
         )
         env = gym.make('multigrid-soccer-v0')
 
